@@ -1,0 +1,18 @@
+import { Module } from '@nestjs/common';
+import { CreateUserUseCase } from './usecases/createUser.usecase';
+import { HashService } from './gateways/security/hash.security';
+import { UserController } from './gateways/controllers/user.controller';
+import { PrismaUserRepository } from './gateways/repository/user.repository';
+import { dbConection } from './gateways/database/dbConection';
+
+@Module({
+  controllers: [UserController],
+  providers: [
+    CreateUserUseCase,
+    HashService,
+    PrismaUserRepository,
+    dbConection
+  ],
+  exports: [HashService],
+})
+export class UsersModule {}
