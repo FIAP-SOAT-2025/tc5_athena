@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { StorageRepositoryInterface } from '../gateways/storage.repository.interface';
+import type { StorageRepositoryInterface } from '../gateways/storage.repository.interface';
 
 @Injectable()
 export class DeleteFileUseCase {
