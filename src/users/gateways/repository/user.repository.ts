@@ -23,11 +23,27 @@ export class PrismaUserRepository implements userRepositoryInterface {
     });
   }
 
+  private readonly selectWithoutPassword = {
+    id: true,
+    name: true,
+    email: true,
+    userRole: true,
+    createdAt: true,
+  };
+
   async findByEmail(email: string): Promise<any | null> {
-    return this.orm.user.findUnique({ where: { email } });
+    return this.orm.user.findUnique({
+      where: { email },
+      select: this.selectWithoutPassword,
+    });
   }
 
-  async findById(id: string): Promise<any | null> {
-    return this.orm.user.findUnique({ where: { id } });
+  async findByEmailOrId(identifier: string): Promise<any | null> {
+    return this.orm.user.findFirst({
+      where: {
+        OR: [{ email: identifier }, { id: identifier }],
+      },
+      select: this.selectWithoutPassword,
+    });
   }
 }
