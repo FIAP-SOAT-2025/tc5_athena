@@ -37,3 +37,15 @@ variable "db_name" {
   type        = string
 }
 
+variable "grafana_admin_user" {
+  description = "Usuário admin do Grafana"
+  type        = string
+  default     = "admin"
+}
+
+variable "grafana_admin_password" {
+  description = "Senha do admin do Grafana"
+  type        = string
+  sensitive   = true
+}
+

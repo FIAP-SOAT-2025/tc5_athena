@@ -18,3 +18,8 @@ output "api_load_balancer_hostname" {
   description = "The public hostname of the API's Network Load Balancer."
   value       = kubernetes_service.api_service.status[0].load_balancer[0].ingress[0].hostname
 }
+
+output "grafana_url" {
+  description = "URL do Grafana"
+  value       = "kubectl get svc grafana -n monitoring -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+}

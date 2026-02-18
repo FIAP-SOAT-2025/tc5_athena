@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/aws
 
 # Logs
 logs
@@ -55,6 +56,12 @@ outputs/
 !/output/.gitkeep
 /upload/*
 !/upload/.gitkeep
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
 
 # Runtime data
 pids
