@@ -1,8 +1,10 @@
 import { BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException } from "@nestjs/common";
+import { ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Express } from 'express';
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+
 
 import { VideoProcessorUseCase } from "../../usecases/videoProcessor.usecase";
 
@@ -16,6 +18,11 @@ export class VideoController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload de vídeo',
+    type: 'multipart/form-data',
+  })
   uploadVideo(@UploadedFile() file: Express.Multer.File) {
     const allowedExtensions = /\.(mp4|avi|mov|mkv|wmv|flv|webm)$/;
     if (!allowedExtensions.test(file.originalname)) {
