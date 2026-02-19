@@ -1,9 +1,10 @@
-import { BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException, Body } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Express } from 'express';
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 
+import { CreateVideoDto } from "./dtos/create.dto";
 import { VideoProcessorUseCase } from "../../usecases/videoProcessor.usecase";
 
 @Controller('video')
@@ -16,12 +17,12 @@ export class VideoController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  uploadVideo(@UploadedFile() file: Express.Multer.File) {
+  uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() createVideoDto: CreateVideoDto) {
     const allowedExtensions = /\.(mp4|avi|mov|mkv|wmv|flv|webm)$/;
     if (!allowedExtensions.test(file.originalname)) {
       throw new BadRequestException('Formato de vídeo não suportado');
     }
-    return this.videoProcessorUseCase.execute(file);
+    return this.videoProcessorUseCase.execute(file, createVideoDto);
   }
 
   @Get('status/:jobId')

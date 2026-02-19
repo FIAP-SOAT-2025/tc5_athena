@@ -3,7 +3,7 @@ import { CreateUserUseCase } from './usecases/createUser.usecase';
 import { HashService } from './gateways/security/hash.security';
 import { UserController } from './gateways/controllers/user.controller';
 import { PrismaUserRepository } from './gateways/repository/user.repository';
-import { dbConection } from './gateways/database/dbConection';
+import { dbConection } from '../database/dbConection';
 
 @Module({
   controllers: [UserController],

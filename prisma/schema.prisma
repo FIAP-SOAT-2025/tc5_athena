@@ -19,6 +19,27 @@ model User {
   passwordHash String
   userRole         UserRole @default(BASIC)
   createdAt    DateTime @default(now())
+  videos       Video[]
 
   @@map("users")
+}
+
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  ERROR
+}
+
+model Video {
+  id         String      @id @default(uuid())
+  size       Int
+  file_name  String
+  extension  String
+  status     VideoStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  userId    String
+  user                User     @relation(fields: [userId], references: [id])
 }
