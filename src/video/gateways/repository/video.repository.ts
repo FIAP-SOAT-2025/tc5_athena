@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { dbConection } from '../../../database/dbConection';
 import { videoRepositoryInterface } from '../video.repository.interface';
-import { Video } from '../../domain/video.entity';
+import { Video, VideoStatus} from '../../domain/video.entity';
 
 @Injectable()
 export class PrismaVideoRepository implements videoRepositoryInterface {
@@ -30,5 +30,12 @@ export class PrismaVideoRepository implements videoRepositoryInterface {
 
   async findByUserId(userId: string): Promise<any[]> {
     return this.orm.video.findMany({ where: { userId } });
+  }
+
+  async updateStatus(id: string, status: VideoStatus): Promise<any> {
+    return this.orm.video.update({
+      where: { id },
+      data: { status, updatedAt: new Date() },
+    });
   }
 }

@@ -17,9 +17,9 @@ export class VideoProcessorUseCase {
     async execute(file: Express.Multer.File, createVideoDto: VideoContext) {
 
         try {
-
+            const videoId = randomUUID();
             const newVideo: Video = {
-                id: randomUUID(),
+                id: videoId,
                 size: parseInt(createVideoDto.size || '1') || 1,
                 file_name: createVideoDto.file_name || '',
                 extension: file.mimetype ||'',
@@ -30,39 +30,23 @@ export class VideoProcessorUseCase {
             };
 
             await this.videoRepository.create(newVideo);
+
+            const timestamp = Date.now();
+            const filePath = `${process.cwd()}/uploads/${timestamp}_${file.originalname}`;
+
+            await fs.promises.writeFile(filePath, file.buffer);
+
+            const job = await this.videoQueue.add('extract-frames', {
+                videoPath: filePath,
+                timestamp: timestamp,
+                videoId: videoId,
+                originalName: file.originalname
+            }, {
+                attempts: 3,
+                backoff: { type: 'exponential', delay: 1000 }
+            });
             
-            // const timestamp = Date.now();
-            // const filePath = `${process.cwd()}/uploads/${timestamp}_${file.originalname}`;
-
-
-
-            // const tempDir = `${process.cwd()}/temp/${timestamp}`;
-            // const zipPath = `${process.cwd()}/outputs/frames_${timestamp}.zip`;
-
-            // await fs.promises.writeFile(filePath, file.buffer);
-
-            // await this.videoProcessor.extractFrames(filePath, tempDir);
-            // await this.videoProcessor.compressFrames(tempDir, zipPath);
-
-            // await fs.promises.rm(tempDir, { recursive: true, force: true });
-
-            // return { 'fileName': `frames_${timestamp}.zip`, 'path': zipPath };
-
-            // const timestamp = Date.now();
-            // const filePath = `${process.cwd()}/uploads/${timestamp}_${file.originalname}`;
-
-            // await fs.promises.writeFile(filePath, file.buffer);
-
-            // const job = await this.videoQueue.add('extract-frames', {
-            //     videoPath: filePath,
-            //     timestamp: timestamp,
-            //     originalName: file.originalname
-            // }, {
-            //     attempts: 3,
-            //     backoff: { type: 'exponential', delay: 1000 }
-            // });
-            
-            return { jobId: 1 , status: 'Processing' };
+            return { jobId: job.id , status: 'Processing', videoId: videoId };
         } catch (error) {
             throw error;
         }
