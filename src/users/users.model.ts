@@ -15,6 +15,6 @@ import { dbConection } from './gateways/database/dbConection';
     PrismaUserRepository,
     dbConection,
   ],
-  exports: [HashService],
+  exports: [HashService, dbConection, PrismaUserRepository],
 })
 export class UsersModule {}

@@ -1,5 +1,5 @@
-import { BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException } from "@nestjs/common";
-import { ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { UseGuards,BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException } from "@nestjs/common";
+import { ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Express } from 'express';
 import { InjectQueue } from "@nestjs/bullmq";
@@ -7,8 +7,10 @@ import { Queue } from "bullmq";
 
 
 import { VideoProcessorUseCase } from "../../usecases/videoProcessor.usecase";
+import { JwtAuthGuard } from "src/auth/gateways/jwt/jwtAuth.guard";
 
 @Controller('video')
+@ApiBearerAuth()
 export class VideoController {
   constructor(
     private readonly videoProcessorUseCase: VideoProcessorUseCase,
@@ -19,6 +21,7 @@ export class VideoController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'Upload de vídeo',
     type: 'multipart/form-data',
@@ -28,10 +31,12 @@ export class VideoController {
     if (!allowedExtensions.test(file.originalname)) {
       throw new BadRequestException('Formato de vídeo não suportado');
     }
+    console.log(`[VideoController.uploadVideo] Received file: ${file.originalname}, size: ${file.size} bytes`);
     return this.videoProcessorUseCase.execute(file);
   }
 
   @Get('status/:jobId')
+  @UseGuards(JwtAuthGuard)
   async getStatus(@Param('jobId') jobId: string) {
     const job = await this.videoQueue.getJob(jobId);
 
