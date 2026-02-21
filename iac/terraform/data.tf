@@ -21,17 +21,8 @@ data "aws_lb_listener" "api_listener" {
 data "terraform_remote_state" "db" {
   backend = "s3"
   config = {
-    bucket = "terraform-state-tc5-athena"
+    bucket = "terraform-state-tc5-g192-athena-v1"
     key    = "db/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-data "terraform_remote_state" "infra" {
-  backend = "s3"
-  config = {
-    bucket = "terraform-state-tc5-athena"
-    key    = "infra/terraform.tfstate"
     region = "us-east-1"
   }
 }
