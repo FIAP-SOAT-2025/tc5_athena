@@ -31,11 +31,21 @@ export class PrismaUserRepository implements userRepositoryInterface {
     createdAt: true,
   };
 
+  async findByUserEmail(email: string): Promise<any | null> {
+    const user = await this.orm.user.findUnique({
+      where: { email },
+    });
+    console.log('[PrismaUserRepository.findByUserEmail] User found by email:', user);
+    return user;
+  }
+
   async findByEmail(email: string): Promise<any | null> {
-    return this.orm.user.findUnique({
+    const user = await this.orm.user.findUnique({
       where: { email },
       select: this.selectWithoutPassword,
     });
+    console.log('[UserRepository.findByEmail] User found by email:', user);
+    return user;
   }
 
   async findByEmailOrId(identifier: string): Promise<any | null> {

@@ -8,10 +8,13 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserUseCase } from '../../usecases/createUser.usecase';
 import { CreateUserDto } from './dtos/create.dto';
 import { GetUserUseCase } from 'src/users/usecases/getUser.usecase';
+import { JwtAuthGuard } from 'src/auth/gateways/jwt/jwtAuth.guard';
 
 @Controller('users')
 export class UserController {
@@ -28,6 +31,8 @@ export class UserController {
   }
 
   @Get(':identifier')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async findOne(@Param('identifier') identifier: string) {
     return await this.getUserUseCase.execute(identifier);
   }

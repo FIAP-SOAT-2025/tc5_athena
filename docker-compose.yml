@@ -20,15 +20,15 @@ services:
     ports:
       - "6379:6379"
 
-  # api:
-  #   build: .
-  #   depends_on:
-  #     - redis
-  #     - postgres
-  #   environment:
-  #     REDIS_HOST: redis
-  #     REDIS_PORT: 6379
-  #     DATABASE_URL: ${DATABASE_URL}
+  api:
+    build: .
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DATABASE_URL: ${DATABASE_URL}
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
