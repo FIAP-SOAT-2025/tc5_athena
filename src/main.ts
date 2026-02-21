@@ -11,7 +11,7 @@ async function bootstrap() {
     .setTitle('Athena Process Videos API')
     .setDescription('API for processing videos in Athena')
     .setVersion('1.0')
-    .addTag('videos')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('athena', app, documentFactory);
