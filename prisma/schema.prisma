@@ -19,7 +19,7 @@ model User {
   passwordHash String
   userRole         UserRole @default(BASIC)
   createdAt    DateTime @default(now())
-  videos    Video[]
+  videos       Video[]
 
   @@map("users")
 }

@@ -1,11 +1,12 @@
-import { UseGuards,BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, NotFoundException } from "@nestjs/common";
+
+import { UseGuards,BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, Body, NotFoundException } from "@nestjs/common";
 import { ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Express } from 'express';
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 
-
+import { CreateVideoDto } from "./dtos/create.dto";
 import { VideoProcessorUseCase } from "../../usecases/videoProcessor.usecase";
 import { JwtAuthGuard } from "src/auth/gateways/jwt/jwtAuth.guard";
 
@@ -26,13 +27,13 @@ export class VideoController {
     description: 'Upload de vídeo',
     type: 'multipart/form-data',
   })
-  uploadVideo(@UploadedFile() file: Express.Multer.File) {
+  uploadVideo(@UploadedFile() file: Express.Multer.File, @Body() createVideoDto: CreateVideoDto) {
     const allowedExtensions = /\.(mp4|avi|mov|mkv|wmv|flv|webm)$/;
     if (!allowedExtensions.test(file.originalname)) {
       throw new BadRequestException('Formato de vídeo não suportado');
     }
     console.log(`[VideoController.uploadVideo] Received file: ${file.originalname}, size: ${file.size} bytes`);
-    return this.videoProcessorUseCase.execute(file);
+    return this.videoProcessorUseCase.execute(file, createVideoDto);
   }
 
   @Get('status/:jobId')

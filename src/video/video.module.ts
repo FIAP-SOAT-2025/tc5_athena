@@ -5,7 +5,8 @@ import { VideoController } from "./gateways/controllers/video.controller";
 import { VideoConsumer } from "./gateways/queue/video.consumer";
 import { VideoProcessorService } from "./gateways/processor/videoProcessor.service";
 import { VideoProcessorUseCase } from "./usecases/videoProcessor.usecase";
-
+import { dbConection } from '../database/dbConection'
+import { PrismaVideoRepository } from "./gateways/repository/video.repository";
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -25,10 +26,12 @@ import { VideoProcessorUseCase } from "./usecases/videoProcessor.usecase";
     providers: [
       VideoProcessorUseCase,
       VideoConsumer,
+      PrismaVideoRepository,
       {
         provide: 'VideoProcessorInterface',
         useClass: VideoProcessorService,
-      }
+      },
+      dbConection,
     ],
 })
 export class VideoModule {}

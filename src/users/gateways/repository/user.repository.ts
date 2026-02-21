@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { dbConection } from '../database/dbConection';
+import { dbConection } from '../../../database/dbConection';
 import { userRepositoryInterface } from '../user.repository.interface';
 import { User, UserRole } from '../../domain/user.entity';
 

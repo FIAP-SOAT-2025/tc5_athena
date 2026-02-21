@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { BullBoardSetup } from './video/gateways/queue/queue.monitoring';
 import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module';
@@ -6,6 +7,10 @@ import { DocumentBuilder } from '@nestjs/swagger/dist/document-builder';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  app.useGlobalPipes(
+    new ValidationPipe(),
+  );  
   BullBoardSetup.configure(app);
    const config = new DocumentBuilder()
     .setTitle('Athena Process Videos API')
