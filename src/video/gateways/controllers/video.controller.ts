@@ -22,7 +22,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from '@nestjs/common';
 
 import { VideoProcessorUseCase } from '../../usecases/videoProcessor.usecase';
-import { JwtAuthGuard } from 'src/auth/gateways/jwt/jwtAuth.guard';
+import { JwtAuthGuard } from 'src/auth/gateways/security/jwtAuth.guard';
 import { FileStorageUseCase } from 'src/video/usecases/fileStorage.usecase';
 import { ValidateFileUseCase } from 'src/video/usecases/validateFile.usecase';
 

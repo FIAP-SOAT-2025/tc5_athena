@@ -1,34 +1,38 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaUserRepository } from 'src/users/gateways/repository/user.repository';
-import { HashService } from 'src/users/gateways/security/hash.security';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import type { UserRepositoryInterface } from 'src/users/gateways/interfaces/user.repository.interface';
+import type { TokenServiceInterface } from '../gateways/interfaces/token.service.interface';
+import { jwtBodyDTO } from '../gateways/controller/dtos/jwtBody.dto';
+import type { HashServiceInterface } from 'src/users/gateways/interfaces/hash.service.interface';
+
 
 @Injectable()
 export class AuthUseCase {
-    constructor(private readonly hashService: HashService,
-        private readonly userRepository: PrismaUserRepository,
-        private readonly jwtService: JwtService) {}
+    constructor(
+        @Inject('HashServiceInterface')
+        private readonly hashService: HashServiceInterface,
+        @Inject('UserRepositoryInterface')
+        private readonly userRepository: UserRepositoryInterface,
+        @Inject('TokenServiceInterface')
+        private readonly jwtService: TokenServiceInterface
+   ) {}
 
     async signIn(email: string, password: string): Promise<{ access_token: string }> {
         const emailExists = await this.userRepository.findByUserEmail(email);
-        console.log("[AuthUseCase.signIn] User found for email:", emailExists);
-         console.log("[AuthUseCase.signIn] User found for password:", emailExists.passwordHash);
+        
         if (!emailExists) {
             throw new ConflictException('Email Not found');
         }
 
         const passwordMatches = await this.hashService.compare(password, emailExists.passwordHash);
-        console.log("[AuthUseCase.signIn] Password match result:", passwordMatches);
+        
         if (!passwordMatches) {
             throw new ConflictException('Invalid password');
         }
         
-        const payload = { sub: emailExists.id, email: emailExists.email, role: emailExists.role };
+        const jwtBody: jwtBodyDTO = { sub: emailExists.id, email: emailExists.email, role: emailExists.role };
 
-        const token = {access_token: this.jwtService.sign(payload)};
-        console.log("[AuthUseCase.signIn] Generated JWT token:", token);
-        console.log("[AuthUseCase.signIn] type of JWT token payload:", typeof (token));
-
+        const token = {access_token: this.jwtService.sign(jwtBody)};
+        
          return token;
     }
 }

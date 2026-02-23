@@ -1,14 +1,19 @@
 
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException,Inject } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { User, UserRole } from '../domain/user.entity';
 import { CreateUserDto } from '../gateways/controllers/dtos/create.dto';
 import { HashService } from '../gateways/security/hash.security';
-import { PrismaUserRepository } from '../gateways/repository/user.repository';
+import type { UserRepositoryInterface } from '../gateways/interfaces/user.repository.interface';
 
 @Injectable()
 export class CreateUserUseCase {
-  constructor(private readonly hashService: HashService, private readonly userRepository: PrismaUserRepository) {}
+  constructor(
+    @Inject('HashServiceInterface')
+    private readonly hashService: HashService,
+    @Inject('UserRepositoryInterface')
+    private readonly userRepository: UserRepositoryInterface
+  ) {}
 
   async execute(dto: CreateUserDto): Promise<Omit<User, 'passwordHash'>> {
     const emailExists = await this.userRepository.findByEmail(dto.email);
