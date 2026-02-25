@@ -11,7 +11,7 @@ resource "kubectl_manifest" "deployment" {
   wait_for_rollout   = true
 
   timeouts {
-    create = "10m"
+    create = "15m"
   }
 
   yaml_body = <<YAML
@@ -40,14 +40,16 @@ spec:
           httpGet:
             path: /health
             port: 3000
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 5
+          failureThreshold: 10
         livenessProbe:
           httpGet:
             path: /health
             port: 3000
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          failureThreshold: 6
         envFrom:
         - configMapRef:
             name: api-configmap

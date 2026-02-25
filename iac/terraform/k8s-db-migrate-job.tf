@@ -1,5 +1,6 @@
 resource "kubectl_manifest" "db_migrate_job" {
   depends_on = [kubectl_manifest.secrets, kubectl_manifest.configmap]
+  wait       = true
   yaml_body  = <<YAML
 apiVersion: batch/v1
 kind: Job
