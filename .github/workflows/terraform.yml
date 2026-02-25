@@ -100,7 +100,23 @@ jobs:
       
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-      
+
+      - name: Debug pods on failure
+        if: failure()
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n tc5-athena -o wide || true
+          echo "=== Describe pods ==="
+          kubectl describe pods -n tc5-athena || true
+          echo "=== Logs (current) ==="
+          kubectl logs -n tc5-athena -l app=tc5-athena-api --tail=100 || true
+          echo "=== Logs (previous crash) ==="
+          kubectl logs -n tc5-athena -l app=tc5-athena-api --previous --tail=100 || true
+          echo "=== Events ==="
+          kubectl get events -n tc5-athena --sort-by='.lastTimestamp' || true
+          echo "=== Migrate job logs ==="
+          kubectl logs -n tc5-athena -l job-name=db-migrate-seed-job --tail=100 || true
+
       - name: Verify API Deployment
         run: |
           echo "Waiting for API pod to be ready..."
