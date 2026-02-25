@@ -1,4 +1,9 @@
+export interface FrameFile {
+  name: string;
+  data: Buffer;
+}
+
 export interface VideoProcessorInterface {
-    extractFrames(filePath: string, outputDir: string): Promise<void>;
-    compressFrames(framesDir: string, outputDir: string): Promise<void>;
+  extractFrames(fileBuffer: Buffer): Promise<FrameFile[]>;
+  compressFrames(frames: FrameFile[]): Promise<Buffer>;
 }
