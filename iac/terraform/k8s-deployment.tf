@@ -3,7 +3,8 @@ resource "kubectl_manifest" "deployment" {
     kubernetes_namespace.athena_ns,
     kubectl_manifest.db_migrate_job,
     kubectl_manifest.secrets,
-    kubectl_manifest.configmap
+    kubectl_manifest.configmap,
+    kubectl_manifest.redis_service
   ]
 
   override_namespace = "tc5-athena"
@@ -21,6 +22,7 @@ metadata:
   name: tc5-athena-api
   namespace: tc5-athena
 spec:
+  progressDeadlineSeconds: 900
   replicas: 1
   selector:
     matchLabels:
