@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './gateways/security/jwtStrategy';
 import { JwtTokenService } from './gateways/security/jwt.token.service';
+import { AuthRefreshTokenUseCase } from './usecases/authRefreshToken.usecase';
 
 @Module({
   imports: [UsersModule,
@@ -20,6 +21,7 @@ import { JwtTokenService } from './gateways/security/jwt.token.service';
   providers: [
     AuthUseCase,
     JwtStrategy,
+    AuthRefreshTokenUseCase,
     {
       provide: 'TokenServiceInterface',
       useClass: JwtTokenService,

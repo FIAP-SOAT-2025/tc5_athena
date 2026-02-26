@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { UserRepositoryInterface } from 'src/users/gateways/interfaces/user.repository.interface';
 import type { TokenServiceInterface } from '../gateways/interfaces/token.service.interface';
 import { jwtBodyDTO } from '../gateways/controller/dtos/jwtBody.dto';
@@ -16,23 +16,26 @@ export class AuthUseCase {
         private readonly jwtService: TokenServiceInterface
    ) {}
 
-    async signIn(email: string, password: string): Promise<{ access_token: string }> {
+    async signIn(email: string, password: string): Promise<{ access_token: string, refresh_token: string }> {
         const emailExists = await this.userRepository.findByUserEmail(email);
         
         if (!emailExists) {
-            throw new ConflictException('Email Not found');
+            throw new NotFoundException('Email Not found');
         }
 
         const passwordMatches = await this.hashService.compare(password, emailExists.passwordHash);
         
         if (!passwordMatches) {
-            throw new ConflictException('Invalid password');
+            throw new UnauthorizedException('Invalid password');
         }
         
         const jwtBody: jwtBodyDTO = { sub: emailExists.id, email: emailExists.email, role: emailExists.role };
 
-        const token = {access_token: this.jwtService.sign(jwtBody)};
         
-         return token;
+        
+        return {
+            access_token: this.jwtService.sign(jwtBody),
+            refresh_token: this.jwtService.signRefresh(jwtBody),
+        };
     }
 }
