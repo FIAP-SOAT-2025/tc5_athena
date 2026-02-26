@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { dbConection } from '../../../database/dbConection';
-import { userRepositoryInterface } from '../user.repository.interface';
+import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { User, UserRole } from '../../domain/user.entity';
 
 @Injectable()
-export class PrismaUserRepository implements userRepositoryInterface {
+export class PrismaUserRepository implements UserRepositoryInterface {
   constructor(private orm: dbConection) {}
 
   async create(user: User): Promise<any> {

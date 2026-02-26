@@ -14,7 +14,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserUseCase } from '../../usecases/createUser.usecase';
 import { CreateUserDto } from './dtos/create.dto';
 import { GetUserUseCase } from 'src/users/usecases/getUser.usecase';
-import { JwtAuthGuard } from 'src/auth/gateways/jwt/jwtAuth.guard';
+import { JwtAuthGuard } from 'src/auth/gateways/security/jwtAuth.guard';
 
 @Controller('users')
 export class UserController {

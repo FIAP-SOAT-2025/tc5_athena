@@ -4,7 +4,9 @@ import { AuthController } from './gateways/controller/auth.controller';
 import { UsersModule } from 'src/users/users.model';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './gateways/jwt/jwtStrategy';
+import { JwtStrategy } from './gateways/security/jwtStrategy';
+import { JwtTokenService } from './gateways/security/jwt.token.service';
+import { AuthRefreshTokenUseCase } from './usecases/authRefreshToken.usecase';
 
 @Module({
   imports: [UsersModule,
@@ -16,7 +18,15 @@ import { JwtStrategy } from './gateways/jwt/jwtStrategy';
       }),
     }),
   ],
-  providers: [AuthUseCase, JwtStrategy],
+  providers: [
+    AuthUseCase,
+    JwtStrategy,
+    AuthRefreshTokenUseCase,
+    {
+      provide: 'TokenServiceInterface',
+      useClass: JwtTokenService,
+    },
+  ],
   exports:[JwtStrategy],
   controllers: [AuthController]
 })
