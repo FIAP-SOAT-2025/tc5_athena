@@ -2,7 +2,6 @@
 import { UseGuards,BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors, Param, Body, NotFoundException } from "@nestjs/common";
 import { ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from "@nestjs/platform-express";
-import type { Express } from 'express';
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 

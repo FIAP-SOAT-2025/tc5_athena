@@ -30,7 +30,7 @@ jobs:
     environment: production
     outputs:
       infra-exists: ${{ steps.check-deps.outputs.infra-exists }}
-    
+
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -39,7 +39,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Check Dependencies
         id: check-deps
         run: |
@@ -51,11 +51,35 @@ jobs:
             echo "infra-exists=false" >> $GITHUB_OUTPUT
             echo "EKS cluster not found"
           fi
-  terraform-apply:
-    name: API Deploy
+
+  build-and-push:
+    name: Build and Push Docker Image
     needs: [check-dependencies]
     runs-on: ubuntu-latest
-    if: needs.check-dependencies.outputs.infra-exists == 'true' && github.event.inputs.action == 'apply'
+    if: needs.check-dependencies.outputs.infra-exists == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'apply')
+    environment: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tc5-athena:latest
+
+  terraform-apply:
+    name: API Deploy
+    needs: [check-dependencies, build-and-push]
+    runs-on: ubuntu-latest
+    if: needs.check-dependencies.outputs.infra-exists == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'apply')
     defaults:
       run:
         working-directory: ./iac/terraform
@@ -65,15 +89,18 @@ jobs:
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_db_name: ${{ secrets.DB_NAME }}
       TF_VAR_grafana_admin_password: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+      TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      TF_VAR_dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
+      TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -81,12 +108,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
           version: 'v1.28.0'
-      
+
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
@@ -137,21 +164,6 @@ jobs:
             echo "LoadBalancer still provisioning..."
             echo "loadbalancer-url=pending" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Health Check
-        if: steps.get-url.outputs.loadbalancer-url != 'pending'
-        run: |
-          URL="${{ steps.get-url.outputs.loadbalancer-url }}/health"
-          echo "Testing health endpoint: $URL"
-          for i in {1..5}; do
-            if curl -f $URL; then
-              echo "Health check passed!"
-              break
-            else
-              echo "Attempt $i failed, retrying in 30s..."
-              sleep 30
-            fi
-          done
       
       - name: Output API Info
         run: |

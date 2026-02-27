@@ -1,6 +1,7 @@
 resource "kubectl_manifest" "db_migrate_job" {
-  depends_on = [kubectl_manifest.secrets, kubectl_manifest.configmap]
+  depends_on = [kubectl_manifest.secrets, kubectl_manifest.configmap, kubernetes_secret.dockerhub_secret]
   wait       = true
+  force_new  = true
   yaml_body  = <<YAML
 apiVersion: batch/v1
 kind: Job
@@ -10,11 +11,13 @@ metadata:
 spec:
   template:
     spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
       containers:
       - name: tc5-athena-migrate-db
         image: dianabianca/tc5-athena:latest
-        imagePullPolicy: IfNotPresent
-        command: ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed"]
+        imagePullPolicy: Always
+        command: ["sh", "-c", "npx prisma migrate deploy"]
         envFrom:
         - configMapRef:
             name: api-configmap
