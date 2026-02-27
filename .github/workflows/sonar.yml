@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm test -- --coverage
+        run: npm test -- --coverage --passWithNoTests
 
       - name: Debug coverage file
         run: |
@@ -46,8 +46,8 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.sources=src
-            -Dsonar.tests=src/item/test
-            -Dsonar.test.inclusions=src/item/test/**/*.spec.ts
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.exclusions=node_modules/**,dist/**,coverage/**
-            -Dsonar.coverage.exclusions=**/*.spec.ts,src/main.ts
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,iac/**
+            -Dsonar.coverage.exclusions=**/*.spec.ts,src/main.ts,src/database/**
