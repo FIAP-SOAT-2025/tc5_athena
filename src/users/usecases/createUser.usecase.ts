@@ -1,6 +1,5 @@
-
 import { Injectable, ConflictException,Inject } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { newId } from 'src/common/uuid';
 import { User, UserRole } from '../domain/user.entity';
 import { CreateUserDto } from '../gateways/controllers/dtos/create.dto';
 import { HashService } from '../gateways/security/hash.security';
@@ -22,7 +21,7 @@ export class CreateUserUseCase {
     }
     
     const newUser: User = {
-      id: uuidv4(),
+      id: newId(),
       name: dto.name,
       email: dto.email,
       passwordHash: this.hashService.hashPassword(dto.password),
