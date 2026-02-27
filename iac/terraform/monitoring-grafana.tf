@@ -1,3 +1,21 @@
+resource "kubernetes_config_map" "grafana_dashboards" {
+  metadata {
+    name      = "grafana-dashboards"
+    namespace = kubernetes_namespace.monitoring.metadata[0].name
+    labels = {
+      grafana_dashboard = "1"
+    }
+  }
+
+  data = {
+    "api-dashboard.json" = file("${path.module}/../../monitoring/grafana/dashboards/api-dashboard.json")
+    "aws-s3.json"        = file("${path.module}/../../monitoring/grafana/dashboards/aws-s3.json")
+    "postgre-sql.json"   = file("${path.module}/../../monitoring/grafana/dashboards/postgre-sql.json")
+  }
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
 resource "helm_release" "grafana" {
   name       = "grafana"
   repository = "https://grafana.github.io/helm-charts"
@@ -50,5 +68,15 @@ resource "helm_release" "grafana" {
     value = "false"
   }
 
-  depends_on = [helm_release.prometheus]
+  set {
+    name  = "sidecar.dashboards.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "sidecar.dashboards.label"
+    value = "grafana_dashboard"
+  }
+
+  depends_on = [helm_release.prometheus, kubernetes_config_map.grafana_dashboards]
 }
