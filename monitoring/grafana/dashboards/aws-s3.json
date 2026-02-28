@@ -52,6 +52,7 @@
   "panels": [
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -184,6 +185,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -316,6 +318,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -448,6 +451,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -531,6 +535,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -614,6 +619,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -697,6 +703,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -866,6 +873,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -1023,6 +1031,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -1106,6 +1115,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -1275,6 +1285,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {

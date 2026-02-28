@@ -59,6 +59,26 @@ resource "helm_release" "grafana" {
   }
 
   set {
+    name  = "datasources.datasources\\.yaml.datasources[1].name"
+    value = "CloudWatch"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].type"
+    value = "cloudwatch"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].jsonData.defaultRegion"
+    value = "us-east-1"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].jsonData.authType"
+    value = "default"
+  }
+
+  set {
     name  = "service.type"
     value = "LoadBalancer"
   }
