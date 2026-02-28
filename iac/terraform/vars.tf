@@ -66,3 +66,22 @@ variable "jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "aws_access_key_id" {
+  description = "AWS Access Key ID para o Grafana acessar o CloudWatch"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_secret_access_key" {
+  description = "AWS Secret Access Key para o Grafana acessar o CloudWatch"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_session_token" {
+  description = "AWS Session Token para o Grafana acessar o CloudWatch (necessário no AWS Academy)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

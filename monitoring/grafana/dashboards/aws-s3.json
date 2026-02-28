@@ -52,6 +52,7 @@
   "panels": [
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -184,6 +185,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -316,6 +318,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -427,7 +430,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "AllRequests",
           "metricQueryType": 0,
@@ -448,6 +451,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -468,7 +472,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "GetRequests",
           "metricQueryType": 0,
@@ -510,7 +514,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "PutRequests",
           "metricQueryType": 0,
@@ -531,6 +535,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -551,7 +556,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "DeleteRequests",
           "metricQueryType": 0,
@@ -593,7 +598,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "HeadRequests",
           "metricQueryType": 0,
@@ -614,6 +619,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -634,7 +640,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "PostRequests",
           "metricQueryType": 0,
@@ -676,7 +682,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "ListRequests",
           "metricQueryType": 0,
@@ -697,6 +703,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -845,7 +852,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "FirstByteLatency",
           "metricQueryType": 0,
@@ -866,6 +873,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -886,7 +894,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "TotalRequestLatency",
           "metricQueryType": 0,
@@ -1023,6 +1031,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -1043,7 +1052,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "BytesDownloaded",
           "metricQueryType": 0,
@@ -1085,7 +1094,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "BytesUploaded",
           "metricQueryType": 0,
@@ -1106,6 +1115,7 @@
     },
     {
       "datasource": {
+        "type": "cloudwatch",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -1254,7 +1264,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "4xxErrors",
           "metricQueryType": 0,
@@ -1275,6 +1285,7 @@
             "filter": ""
           },
           "datasource": {
+            "type": "cloudwatch",
             "uid": "$datasource"
           },
           "dimensions": {
@@ -1295,7 +1306,7 @@
             "filter": ""
           },
           "label": "",
-          "matchExact": true,
+          "matchExact": false,
           "metricEditorMode": 0,
           "metricName": "5xxErrors",
           "metricQueryType": 0,
@@ -1372,7 +1383,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "athena-videos",
+          "value": "athena-videos"
+        },
         "datasource": {
           "type": "cloudwatch",
           "uid": "$datasource"
@@ -1390,7 +1405,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "cloudwatch",
           "uid": "$datasource"

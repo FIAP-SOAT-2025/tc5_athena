@@ -8,9 +8,10 @@ resource "kubernetes_config_map" "grafana_dashboards" {
   }
 
   data = {
-    "api-dashboard.json" = file("${path.module}/../../monitoring/grafana/dashboards/api-dashboard.json")
-    "aws-s3.json"        = file("${path.module}/../../monitoring/grafana/dashboards/aws-s3.json")
-    "postgre-sql.json"   = file("${path.module}/../../monitoring/grafana/dashboards/postgre-sql.json")
+    "api-dashboard.json"    = file("${path.module}/../../monitoring/grafana/dashboards/api-dashboard.json")
+    "aws-s3.json"           = file("${path.module}/../../monitoring/grafana/dashboards/aws-s3.json")
+    "postgre-sql.json"      = file("${path.module}/../../monitoring/grafana/dashboards/postgre-sql.json")
+    "system-overview.json"  = file("${path.module}/../../monitoring/grafana/dashboards/system-overview.json")
   }
 
   depends_on = [kubernetes_namespace.monitoring]
@@ -56,6 +57,41 @@ resource "helm_release" "grafana" {
   set {
     name  = "datasources.datasources\\.yaml.datasources[0].isDefault"
     value = "true"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].name"
+    value = "CloudWatch"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].type"
+    value = "cloudwatch"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].jsonData.defaultRegion"
+    value = "us-east-1"
+  }
+
+  set {
+    name  = "datasources.datasources\\.yaml.datasources[1].jsonData.authType"
+    value = "keys"
+  }
+
+  set_sensitive {
+    name  = "datasources.datasources\\.yaml.datasources[1].secureJsonData.accessKey"
+    value = var.aws_access_key_id
+  }
+
+  set_sensitive {
+    name  = "datasources.datasources\\.yaml.datasources[1].secureJsonData.secretKey"
+    value = var.aws_secret_access_key
+  }
+
+  set_sensitive {
+    name  = "env.AWS_SESSION_TOKEN"
+    value = var.aws_session_token
   }
 
   set {
