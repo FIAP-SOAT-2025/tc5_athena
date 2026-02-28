@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
+import { HashServiceInterface } from '../interfaces/hash.service.interface';
 
 @Injectable()
-export class HashService {
+export class HashService implements HashServiceInterface {
+  
   hashPassword(password: string): string {
     console.log("[HashService.hashPassword] Hashing password:", password);
     return createHash('sha256').update(password).digest('hex');

@@ -11,10 +11,16 @@ import { dbConection } from '../database/dbConection';
   providers: [
     CreateUserUseCase,
     GetUserUseCase,
-    HashService,
-    PrismaUserRepository,
     dbConection,
+    {
+      provide: 'UserRepositoryInterface',
+      useClass: PrismaUserRepository,
+    },
+    {
+      provide: 'HashServiceInterface',
+      useClass: HashService,
+    }
   ],
-  exports: [HashService, dbConection, PrismaUserRepository],
+  exports: [dbConection, 'HashServiceInterface','UserRepositoryInterface'],
 })
 export class UsersModule {}

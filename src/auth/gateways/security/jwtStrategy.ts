@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, Inject } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { PrismaUserRepository } from "src/users/gateways/repository/user.repository";
+import type { UserRepositoryInterface } from "src/users/gateways/interfaces/user.repository.interface";
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(private readonly userRepository: PrismaUserRepository) {
+    constructor(@Inject('UserRepositoryInterface')
+    private readonly userRepository: UserRepositoryInterface,) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
