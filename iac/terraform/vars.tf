@@ -49,3 +49,20 @@ variable "grafana_admin_password" {
   sensitive   = true
 }
 
+variable "dockerhub_username" {
+  description = "Usuário do Docker Hub para pull de imagens privadas"
+  type        = string
+  default     = "dianabianca"
+}
+
+variable "dockerhub_password" {
+  description = "Senha ou token de acesso do Docker Hub"
+  type        = string
+  sensitive   = true
+}
+
+variable "jwt_secret" {
+  description = "Chave secreta para assinatura dos tokens JWT"
+  type        = string
+  sensitive   = true
+}
