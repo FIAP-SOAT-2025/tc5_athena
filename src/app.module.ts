@@ -1,4 +1,5 @@
-import { APP_INTERCEPTOR, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VideoModule } from './video/video.module';
 import { UsersModule } from './users/users.model';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
