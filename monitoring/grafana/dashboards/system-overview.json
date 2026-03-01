@@ -2,7 +2,7 @@
   "title": "Athena - Saúde do Sistema",
   "uid": "athena-system",
   "schemaVersion": 36,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": { "from": "now-24h", "to": "now" },
   "timezone": "browser",
@@ -14,7 +14,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "up{job=\"nestjs-api\"}",
+          "expr": "up{job=\"kubernetes-pods\", app=\"tc5-athena-api\"}",
           "legendFormat": ""
         }
       ],
@@ -53,11 +53,11 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "PostgreSQL Status",
+      "title": "Pods Prontos",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "up{job=\"postgres\"}",
+          "expr": "kube_deployment_status_replicas_ready{namespace=\"tc5-athena\", deployment=\"tc5-athena-api\"}",
           "legendFormat": ""
         }
       ],
@@ -72,6 +72,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "decimals": 0,
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
@@ -80,15 +81,7 @@
               { "color": "green", "value": 1 }
             ]
           },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": { "text": "DOWN", "color": "red" },
-                "1": { "text": "UP", "color": "green" }
-              }
-            }
-          ]
+          "mappings": []
         }
       },
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
@@ -96,11 +89,11 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Conexões Ativas ao BD",
+      "title": "Total Requisições (1h)",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(pg_stat_database_numbackends{datname!~\"template.*|postgres\"})",
+          "expr": "sum(increase(http_requests_total{namespace=\"tc5-athena\"}[1h]))",
           "legendFormat": ""
         }
       ],
@@ -116,15 +109,8 @@
         "defaults": {
           "unit": "short",
           "decimals": 0,
-          "color": { "mode": "thresholds" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 50 }
-            ]
-          },
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
           "mappings": []
         }
       },
@@ -133,11 +119,11 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Tamanho do Banco de Dados",
+      "title": "Restarts de Pods",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(pg_database_size_bytes{datname!~\"template.*|postgres\"})",
+          "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"tc5-athena\"})",
           "legendFormat": ""
         }
       ],
@@ -151,9 +137,17 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
-          "color": { "mode": "fixed", "fixedColor": "purple" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          },
           "mappings": []
         }
       },
@@ -174,7 +168,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "topk(7, sum by (route, method) (increase(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[24h])))",
+          "expr": "topk(7, sum by (route, method) (increase(http_requests_total{namespace=\"tc5-athena\"}[24h])))",
           "legendFormat": "{{method}} {{route}}"
         }
       ],
@@ -206,7 +200,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "topk(7, sum by (route, method) (increase(http_requests_total{kubernetes_namespace=\"tc5-athena\",status_code=~\"[45]..\"}[24h])))",
+          "expr": "topk(7, sum by (route, method) (increase(http_requests_total{namespace=\"tc5-athena\",status_code=~\"[45]..\"}[24h])))",
           "legendFormat": "{{method}} {{route}}"
         }
       ],
@@ -246,7 +240,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (route, method) (rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[10m]))",
+          "expr": "sum by (route, method) (rate(http_requests_total{namespace=\"tc5-athena\"}[10m]))",
           "legendFormat": "{{method}} {{route}}"
         }
       ],
@@ -263,23 +257,23 @@
     {
       "id": 30,
       "type": "row",
-      "title": "Banco de Dados PostgreSQL",
+      "title": "Recursos do Container (Kubernetes)",
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 }
     },
     {
       "id": 31,
       "type": "timeseries",
-      "title": "Conexões ao Banco de Dados",
+      "title": "CPU do Container (%)",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (datname) (pg_stat_database_numbackends{datname!~\"template.*|postgres\"})",
-          "legendFormat": "{{datname}}"
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"tc5-athena\", container=\"tc5-athena-api\"}[5m])) * 100",
+          "legendFormat": "CPU %"
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short", "min": 0 }
+        "defaults": { "unit": "percent", "min": 0 }
       },
       "options": {
         "tooltip": { "mode": "multi" },
@@ -290,16 +284,16 @@
     {
       "id": 32,
       "type": "timeseries",
-      "title": "Transações por Segundo (TPS)",
+      "title": "Memória do Container",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (datname) (rate(pg_stat_database_xact_commit_total{datname!~\"template.*|postgres\"}[5m]) + rate(pg_stat_database_xact_rollback_total{datname!~\"template.*|postgres\"}[5m]))",
-          "legendFormat": "{{datname}}"
+          "expr": "sum(container_memory_working_set_bytes{namespace=\"tc5-athena\", container=\"tc5-athena-api\"})",
+          "legendFormat": "Memória"
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short", "min": 0 }
+        "defaults": { "unit": "bytes", "min": 0 }
       },
       "options": {
         "tooltip": { "mode": "multi" },

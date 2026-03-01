@@ -14,7 +14,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(increase(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[1h]))",
+          "expr": "sum(increase(http_requests_total{namespace=\"tc5-athena\"}[1h]))",
           "legendFormat": ""
         }
       ],
@@ -44,7 +44,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m]))",
+          "expr": "sum(rate(http_requests_total{namespace=\"tc5-athena\"}[5m]))",
           "legendFormat": ""
         }
       ],
@@ -74,7 +74,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m])) * 100",
+          "expr": "sum(rate(http_requests_total{namespace=\"tc5-athena\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{namespace=\"tc5-athena\"}[5m])) * 100",
           "legendFormat": ""
         }
       ],
@@ -111,7 +111,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{kubernetes_namespace=\"tc5-athena\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"tc5-athena\"}[5m])))",
           "legendFormat": ""
         }
       ],
@@ -156,7 +156,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (route, method) (rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m]))",
+          "expr": "sum by (route, method) (rate(http_requests_total{namespace=\"tc5-athena\"}[5m]))",
           "legendFormat": "{{method}} {{route}}"
         }
       ],
@@ -176,7 +176,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (status_code) (rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m]))",
+          "expr": "sum by (status_code) (rate(http_requests_total{namespace=\"tc5-athena\"}[5m]))",
           "legendFormat": "HTTP {{status_code}}"
         }
       ],
@@ -218,15 +218,15 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{kubernetes_namespace=\"tc5-athena\"}[5m])))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"tc5-athena\"}[5m])))",
           "legendFormat": "P50"
         },
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{kubernetes_namespace=\"tc5-athena\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"tc5-athena\"}[5m])))",
           "legendFormat": "P95"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{kubernetes_namespace=\"tc5-athena\"}[5m])))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"tc5-athena\"}[5m])))",
           "legendFormat": "P99"
         }
       ],
@@ -246,7 +246,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (route, method) (rate(http_request_duration_seconds_sum{kubernetes_namespace=\"tc5-athena\"}[5m])) / sum by (route, method) (rate(http_request_duration_seconds_count{kubernetes_namespace=\"tc5-athena\"}[5m]))",
+          "expr": "sum by (route, method) (rate(http_request_duration_seconds_sum{namespace=\"tc5-athena\"}[5m])) / sum by (route, method) (rate(http_request_duration_seconds_count{namespace=\"tc5-athena\"}[5m]))",
           "legendFormat": "{{method}} {{route}}"
         }
       ],
@@ -274,7 +274,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum by (route, method, status_code) (rate(http_requests_total{kubernetes_namespace=\"tc5-athena\",status_code=~\"[45]..\"}[5m]))",
+          "expr": "sum by (route, method, status_code) (rate(http_requests_total{namespace=\"tc5-athena\",status_code=~\"[45]..\"}[5m]))",
           "legendFormat": "{{method}} {{route}} ({{status_code}})"
         }
       ],
@@ -298,11 +298,11 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m])) * 100",
+          "expr": "sum(rate(http_requests_total{namespace=\"tc5-athena\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{namespace=\"tc5-athena\"}[5m])) * 100",
           "legendFormat": "Erro 5xx (%)"
         },
         {
-          "expr": "sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\",status_code=~\"4..\"}[5m])) / sum(rate(http_requests_total{kubernetes_namespace=\"tc5-athena\"}[5m])) * 100",
+          "expr": "sum(rate(http_requests_total{namespace=\"tc5-athena\",status_code=~\"4..\"}[5m])) / sum(rate(http_requests_total{namespace=\"tc5-athena\"}[5m])) * 100",
           "legendFormat": "Erro 4xx (%)"
         }
       ],
@@ -340,7 +340,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total{kubernetes_namespace=\"tc5-athena\"}[1m]) * 100",
+          "expr": "rate(process_cpu_seconds_total{namespace=\"tc5-athena\"}[1m]) * 100",
           "legendFormat": "CPU %"
         }
       ],
@@ -356,11 +356,11 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "nodejs_heap_size_used_bytes{kubernetes_namespace=\"tc5-athena\"}",
+          "expr": "nodejs_heap_size_used_bytes{namespace=\"tc5-athena\"}",
           "legendFormat": "Heap Usada"
         },
         {
-          "expr": "nodejs_heap_size_total_bytes{kubernetes_namespace=\"tc5-athena\"}",
+          "expr": "nodejs_heap_size_total_bytes{namespace=\"tc5-athena\"}",
           "legendFormat": "Heap Total"
         }
       ],
@@ -376,7 +376,7 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "nodejs_eventloop_lag_seconds{kubernetes_namespace=\"tc5-athena\"}",
+          "expr": "nodejs_eventloop_lag_seconds{namespace=\"tc5-athena\"}",
           "legendFormat": "Event Loop Lag"
         }
       ],
@@ -392,11 +392,11 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "nodejs_active_handles_total{kubernetes_namespace=\"tc5-athena\"}",
+          "expr": "nodejs_active_handles_total{namespace=\"tc5-athena\"}",
           "legendFormat": "Handles Ativos"
         },
         {
-          "expr": "nodejs_active_requests_total{kubernetes_namespace=\"tc5-athena\"}",
+          "expr": "nodejs_active_requests_total{namespace=\"tc5-athena\"}",
           "legendFormat": "Requests Ativos"
         }
       ],
