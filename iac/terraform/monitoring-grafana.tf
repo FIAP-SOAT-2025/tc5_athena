@@ -8,9 +8,8 @@ resource "kubernetes_config_map" "grafana_dashboards" {
   }
 
   data = {
-    "api-dashboard.json" = file("${path.module}/../../monitoring/grafana/dashboards/api-dashboard.json")
-    "aws-s3.json"        = file("${path.module}/../../monitoring/grafana/dashboards/aws-s3.json")
-    "postgre-sql.json"   = file("${path.module}/../../monitoring/grafana/dashboards/postgre-sql.json")
+    "api-dashboard.json"   = file("${path.module}/../../monitoring/grafana/dashboards/api-dashboard.json")
+    "system-overview.json" = file("${path.module}/../../monitoring/grafana/dashboards/system-overview.json")
   }
 
   depends_on = [kubernetes_namespace.monitoring]

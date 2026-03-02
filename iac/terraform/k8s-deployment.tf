@@ -27,6 +27,10 @@ spec:
     metadata:
       labels:
         app: tc5-athena-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "3000"
     spec:
       imagePullSecrets:
       - name: dockerhub-secret
