@@ -3,10 +3,6 @@ name: Athena Deploy
 on:
   push:
     branches: [main]
-    paths: ['/**']
-  pull_request:
-    branches: [main]
-    paths: ['/**']
   workflow_dispatch:
     inputs:
       action:
