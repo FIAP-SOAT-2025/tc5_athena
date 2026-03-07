@@ -79,18 +79,30 @@ Prometheus é um sistema open-source de monitoramento e alerta, desenvolvido pel
 
 ### 2.2 Como está implantado
 
-Prometheus é instalado via **Helm chart oficial** (`prometheus-community/prometheus`), gerenciado pelo Terraform no arquivo `iac/terraform/monitoring-grafana.tf`.
+Prometheus é instalado via **Helm chart oficial** (`prometheus-community/prometheus`), gerenciado pelo Terraform no arquivo `iac/terraform/monitoring-prometheus.tf`.
 
 ```
 Namespace:  monitoring
+Chart:      prometheus-community/prometheus v25.11.0
 Service:    prometheus-server (ClusterIP, porta 80 → 9090)
+```
+
+**Configurações de deploy:**
+```hcl
+# Persistência desabilitada (dados não sobrevivem a restarts)
+server.persistentVolume.enabled = false
+
+# Componentes desabilitados
+alertmanager.enabled        = false
+prometheus-pushgateway.enabled = false
 ```
 
 O Helm chart inclui automaticamente:
 - `prometheus-server` — servidor principal
 - `prometheus-kube-state-metrics` — exporta métricas do estado dos objetos Kubernetes (Deployments, Pods, etc.)
 - `prometheus-node-exporter` — exporta métricas de hardware dos nodes (CPU, memória, disco)
-- `prometheus-alertmanager` — gerencia alertas (não configurado no projeto)
+- `prometheus-alertmanager` — desabilitado no projeto (`alertmanager.enabled = false`)
+- `prometheus-pushgateway` — desabilitado no projeto (`prometheus-pushgateway.enabled = false`)
 
 ### 2.3 Como o scraping funciona
 
@@ -119,7 +131,7 @@ O job `kubernetes-pods` do Prometheus descobre todos os pods com `prometheus.io/
 
 #### Métricas HTTP customizadas (definidas na API)
 
-Implementadas via `MetricsMiddleware` (`src/metrics/prometheus.middleware.ts`) usando `res.on('finish')`, capturando exclusivamente as rotas dos controllers da API (`/auth`, `/users`, `/video`), incluindo erros de guards (401, 403) e validações (400).
+Implementadas via `MetricsMiddleware` (`src/metrics/prometheus.middleware.ts`) usando `res.on('finish')`, capturando exclusivamente as rotas dos controllers da API (`/auth`, `/users`, `/video`, `/health`), incluindo erros de guards (401, 403) e validações (400).
 
 | Métrica | Tipo | Labels | Descrição |
 |---------|------|--------|-----------|
@@ -433,12 +445,12 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(MetricsMiddleware)
-      .forRoutes(AuthController, UserController, VideoController);
+      .forRoutes(AuthController, UserController, VideoController, HealthController);
   }
 }
 ```
 
-> O middleware é aplicado apenas nos controllers da API (`/auth`, `/users`, `/video`).
+> O middleware é aplicado apenas nos controllers da API (`/auth`, `/users`, `/video`, `/health`).
 
 ### Endpoint de métricas
 
