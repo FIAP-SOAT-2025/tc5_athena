@@ -46,8 +46,8 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.sources=src
-            -Dsonar.tests=src
-            -Dsonar.test.inclusions=**/*.spec.ts
+              -Dsonar.tests=src
+              -Dsonar.test.inclusions=src/**/*.spec.ts
             -Dsonar.coverage.reportPaths=coverage/lcov.info
             -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,iac/**
             -Dsonar.coverage.exclusions=**/*.spec.ts,src/main.ts,src/database/**
