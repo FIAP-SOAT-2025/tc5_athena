@@ -10,10 +10,10 @@ import {
 } from '@willsoto/nestjs-prometheus';
 import { AuthModule } from './auth/auth.module';
 import { MetricsMiddleware } from './metrics/prometheus.middleware';
-import { HealthModule } from './health/health.module';
 import { AuthController } from './auth/gateways/controller/auth.controller';
 import { UserController } from './users/gateways/controllers/user.controller';
 import { VideoController } from './video/gateways/controllers/video.controller';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { VideoController } from './video/gateways/controllers/video.controller';
     UsersModule,
     StorageModule,
     AuthModule,
-    HealthModule,
+    HealthModule
   ],
   controllers: [],
   providers: [
