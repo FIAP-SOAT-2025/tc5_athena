@@ -30,6 +30,7 @@ services:
       REDIS_PORT: 6379
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?schema=public
       JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: "*"
     ports:
       - "3000:3000"
   postgres-exporter:
