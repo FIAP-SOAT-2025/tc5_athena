@@ -13,6 +13,7 @@ import { MetricsMiddleware } from './metrics/prometheus.middleware';
 import { AuthController } from './auth/gateways/controller/auth.controller';
 import { UserController } from './users/gateways/controllers/user.controller';
 import { VideoController } from './video/gateways/controllers/video.controller';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { VideoController } from './video/gateways/controllers/video.controller';
     UsersModule,
     StorageModule,
     AuthModule,
+    HealthModule
   ],
   controllers: [],
   providers: [
