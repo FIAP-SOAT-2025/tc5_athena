@@ -53,5 +53,3 @@ jobs:
             -Dsonar.tests=src
             -Dsonar.test.inclusions=src/**/*.spec.ts
             -Dsonar.coverage.reportPaths=coverage/lcov.info
-            -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,iac/**,test-path/**,frontend/**
-            -Dsonar.coverage.exclusions=**/*.spec.ts,src/main.ts,src/**/*.module.ts,src/**/*.dto.ts
