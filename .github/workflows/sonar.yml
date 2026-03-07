@@ -40,7 +40,7 @@ jobs:
           head -20 coverage/lcov.info || echo "Arquivo lcov.info não encontrado"
 
       - name: Run SonarCloud analysis
-        uses: SonarSource/sonarqube-scan-action@b42848bfdabac7fefc656c08af7a7864240124a3
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
