@@ -1,230 +1,312 @@
-# Video Processing App
+# Athena - API de Processamento de Vídeos
 
-Aplicação full-stack para processamento de vídeos com API NestJS e frontend React.
+<p align="center">
+  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+</p>
 
-## Arquitetura
+API RESTful para upload e processamento de vídeos, construída com NestJS, com suporte a filas assíncronas e infraestrutura escalável.
+
+---
+
+## 📋 Índice
+
+- [Visão Geral](#-visão-geral)
+- [Tecnologias](#-tecnologias)
+- [Arquitetura](#-arquitetura)
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Variáveis de Ambiente](#-variáveis-de-ambiente)
+- [Executando a Aplicação](#-executando-a-aplicação)
+- [API Endpoints](#-api-endpoints)
+- [Testes](#-testes)
+- [Monitoramento](#-monitoramento)
+- [Infraestrutura](#-infraestrutura)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+
+---
+
+## 🎯 Visão Geral
+
+O **Athena** é uma API para processamento de vídeos que permite:
+
+- 📹 Upload de vídeos para processamento
+- ⚡ Processamento assíncrono com filas (BullMQ)
+- 🔐 Autenticação JWT com refresh tokens
+- 👥 Gestão de usuários (ADMIN/BASIC)
+- ☁️ Armazenamento em S3
+- 📊 Monitoramento com Prometheus e Grafana
+
+---
+
+## 🛠 Tecnologias
+
+| Tecnologia | Descrição |
+|------------|-----------|
+| **NestJS** | Framework Node.js para APIs escaláveis |
+| **TypeScript** | Tipagem estática |
+| **Prisma** | ORM para PostgreSQL |
+| **PostgreSQL** | Banco de dados relacional |
+| **Redis** | Cache e filas com BullMQ |
+| **FFmpeg** | Processamento de vídeos |
+| **AWS S3** | Armazenamento de arquivos |
+| **Docker** | Containerização |
+| **Terraform** | Infraestrutura como código |
+| **Kubernetes** | Orquestração de containers (EKS) |
+| **Prometheus + Grafana** | Monitoramento e métricas |
+
+---
+
+## 🏗 Arquitetura
 
 ```
-tc5-hack/
-├── src/                 # Backend NestJS API
-├── frontend/            # Frontend React
-├── prisma/              # Database schema e migrations
-├── iac/                 # Infrastructure as Code (Terraform)
-└── monitoring/          # Prometheus & Grafana configs
+┌─────────────────────────────────────────────────────────────┐
+│                         Cliente                             │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    API NestJS (:3000)                       │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌──────────────┐   │
+│  │  Auth   │  │  Users  │  │  Video  │  │   Storage    │   │
+│  └─────────┘  └─────────┘  └────┬────┘  └──────────────┘   │
+└────────────────────────────────┬┼───────────────────────────┘
+                                 ││
+              ┌──────────────────┘│
+              ▼                   ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│   Redis (BullMQ)    │   │    PostgreSQL       │
+│   Filas de Vídeo    │   │    (Prisma ORM)     │
+└─────────────────────┘   └─────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Video Worker (FFmpeg Processing)                  │
+│                         │                                   │
+│                         ▼                                   │
+│                    AWS S3 Storage                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Requisitos
+---
 
-- Node.js 18+
-- npm ou yarn
-- Docker e Docker Compose (para banco de dados e serviços)
-- PostgreSQL (ou usar via Docker)
-- Redis (ou usar via Docker)
+## 📦 Pré-requisitos
 
-## Quick Start (Ambiente Completo)
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- **Docker** e **Docker Compose**
+- **FFmpeg** (para processamento local)
 
-### 1. Iniciar serviços com Docker
+---
+
+## 🚀 Instalação
 
 ```bash
-docker-compose up -d
-```
+# Clone o repositório
+git clone <repository-url>
+cd tc5-hack
 
-Isso iniciará:
-- PostgreSQL (porta 5432)
-- Redis (porta 6379)
-
-### 2. Configurar variáveis de ambiente
-
-```bash
-# Backend
-cp .env.example .env
-# Editar .env com suas configurações
-
-# Frontend
-cp frontend/.env.example frontend/.env
-```
-
-### 3. Instalar dependências
-
-```bash
-# Backend
+# Instale as dependências
 npm install
 
-# Frontend
-cd frontend && npm install && cd ..
-```
-
-### 4. Rodar migrations do banco
-
-```bash
-npx prisma migrate dev
+# Gere o cliente Prisma
 npx prisma generate
-```
 
-### 5. Executar os projetos
-
-```bash
-# Terminal 1 - Backend (porta 3000)
-npm run start:dev
-
-# Terminal 2 - Frontend (porta 5173)
-cd frontend && npm run dev
+# Execute as migrations
+npx prisma migrate dev
 ```
 
 ---
 
-## Backend (API NestJS)
+## 🔧 Variáveis de Ambiente
 
-### Configuração
-
-Variáveis de ambiente necessárias no `.env`:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/videodb"
-JWT_SECRET="your-jwt-secret"
-REDIS_HOST="localhost"
-REDIS_PORT="6379"
-AWS_ACCESS_KEY_ID="your-aws-key"
-AWS_SECRET_ACCESS_KEY="your-aws-secret"
-AWS_S3_BUCKET="your-bucket"
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/athena?schema=public"
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=athena
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=sua-chave-secreta-aqui
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=athena-videos
+
+# Application
+OUTPUT_FILE_NAME=output.zip
 ```
 
-### Comandos
+---
+
+## ▶️ Executando a Aplicação
+
+### Com Docker Compose (Recomendado)
 
 ```bash
-# Desenvolvimento (com hot-reload)
+# Inicia todos os serviços (API, PostgreSQL, Redis, Prometheus, Grafana)
+docker-compose up -d
+
+# Visualizar logs
+docker-compose logs -f api
+```
+
+### Desenvolvimento Local
+
+```bash
+# Modo desenvolvimento (watch)
 npm run start:dev
 
-# Produção
+# Modo debug
+npm run start:debug
+
+# Modo produção
 npm run build
 npm run start:prod
-
-# Testes
-npm run test
-npm run test:e2e
-npm run test:cov
 ```
-
-### Endpoints da API
-
-| Método | Rota | Descrição | Auth |
-|--------|------|-----------|------|
-| POST | `/auth/signin` | Login | Não |
-| POST | `/auth/refresh` | Refresh token | Não |
-| POST | `/users` | Criar usuário | Não |
-| GET | `/users/:identifier` | Buscar usuário | Sim |
-| POST | `/video` | Upload de vídeo | Sim |
-| GET | `/video/status/:jobId` | Status do processamento | Sim |
-| GET | `/video/:userId/:videoId` | Download do resultado | Sim |
 
 ---
 
-## Frontend (React + Vite)
+## 📡 API Endpoints
 
-### Configuração
+### Autenticação
 
-Variáveis de ambiente no `frontend/.env`:
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `POST` | `/auth/signin` | Login com email/senha |
+| `POST` | `/auth/refresh` | Renovar access token |
 
-```env
-VITE_API_URL=http://localhost:3000
-```
+### Usuários
 
-### Comandos
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/users` | Criar novo usuário | ❌ |
+| `GET` | `/users/:identifier` | Buscar usuário por ID/email | ✅ |
 
-```bash
-cd frontend
+### Vídeos
 
-# Desenvolvimento
-npm run dev
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/video` | Upload de vídeo | ✅ |
+| `GET` | `/video/status/:jobId` | Status do processamento | ✅ |
+| `GET` | `/video/:userId/:videoId` | Download do vídeo processado | ✅ |
 
-# Build para produção
-npm run build
+### Métricas
 
-# Preview do build
-npm run preview
-```
-
-### Páginas
-
-| Rota | Descrição | Requer Login |
-|------|-----------|--------------|
-| `/login` | Tela de login | Não |
-| `/register` | Cadastro de usuário | Não |
-| `/` | Dashboard | Sim |
-| `/upload` | Upload de vídeo | Sim |
-| `/status` | Status do processamento | Sim |
-| `/profile` | Perfil do usuário | Sim |
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/metrics` | Métricas Prometheus |
 
 ---
 
-## Desenvolvimento
-
-### Rodar ambos projetos simultaneamente
-
-**Opção 1: Dois terminais**
+## 🧪 Testes
 
 ```bash
-# Terminal 1
-npm run start:dev
-
-# Terminal 2
-cd frontend && npm run dev
-```
-
-**Opção 2: Usando concurrently**
-
-```bash
-npm install -g concurrently
-concurrently "npm run start:dev" "cd frontend && npm run dev"
-```
-
-### URLs
-
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000
-- **Swagger (API docs)**: http://localhost:3000/api
-
----
-
-## Testes
-
-```bash
-# Testes unitários do backend
+# Testes unitários
 npm run test
 
-# Testes e2e do backend
-npm run test:e2e
+# Testes em modo watch
+npm run test:watch
 
-# Coverage
+# Cobertura de testes
 npm run test:cov
+
+# Testes e2e
+npm run test:e2e
 ```
 
 ---
 
-## Docker
+## 📊 Monitoramento
 
-### Build completo
+A aplicação inclui uma stack completa de monitoramento:
+
+| Serviço | URL | Descrição |
+|---------|-----|-----------|
+| **Prometheus** | http://localhost:9090 | Coleta de métricas |
+| **Grafana** | http://localhost:3001 | Dashboards de visualização |
+| **Postgres Exporter** | http://localhost:9187 | Métricas do PostgreSQL |
+
+### Dashboards Disponíveis
+
+- **Athena API — Métricas HTTP**: Requisições, latência, erros
+- **Athena — Saúde do Sistema**: CPU, memória, status dos pods
+
+Para mais detalhes, consulte a [documentação de monitoramento](docs/monitoring.md).
+
+---
+
+## 🏗 Infraestrutura
+
+O projeto inclui configurações de infraestrutura como código:
+
+```
+iac/terraform/
+├── provider.tf          # Configuração AWS/K8s
+├── k8s-namespace.tf     # Namespace da aplicação
+├── k8s-deployment.tf    # Deployment da API
+├── k8s-service.tf       # Service LoadBalancer
+├── k8s-ingress.tf       # Ingress Controller
+├── k8s-secrets.tf       # Secrets (JWT, DB)
+├── k8s-configmap.tf     # ConfigMaps
+├── k8s-redis.tf         # Redis no cluster
+├── k8s-db-migrate-job.tf # Job de migrations
+├── monitoring-*.tf      # Stack de monitoramento
+└── vars.tf              # Variáveis
+```
+
+### Deploy no Kubernetes
 
 ```bash
-docker-compose up --build
-```
-
-### Apenas serviços de infraestrutura
-
-```bash
-docker-compose up -d postgres redis
+cd iac/terraform
+terraform init
+terraform plan
+terraform apply
 ```
 
 ---
 
-## Monitoring
+## 📁 Estrutura do Projeto
 
-A aplicação inclui configuração de Prometheus e Grafana para monitoramento.
-
-Consulte [docs/monitoring.md](docs/monitoring.md) para mais detalhes.
+```
+src/
+├── main.ts                 # Bootstrap da aplicação
+├── app.module.ts           # Módulo principal
+├── auth/                   # Módulo de autenticação
+│   ├── gateways/
+│   │   ├── controller/     # Controllers
+│   │   ├── security/       # Guards JWT
+│   │   └── interfaces/
+│   └── usecases/           # Casos de uso
+├── users/                  # Módulo de usuários
+│   ├── domain/             # Entidades
+│   ├── gateways/
+│   │   ├── controllers/
+│   │   ├── repository/
+│   │   └── database/
+│   └── usecases/
+├── video/                  # Módulo de vídeos
+│   ├── domain/
+│   ├── gateways/
+│   │   ├── controllers/
+│   │   └── consumers/      # Workers de fila
+│   └── usecases/
+├── storage/                # Módulo de storage (S3)
+├── metrics/                # Middleware Prometheus
+├── common/                 # Utilitários
+└── database/               # Conexão Prisma
+```
 
 ---
 
-## License
+## 📄 Licença
 
-MIT
+Este projeto é privado e não possui licença pública.
