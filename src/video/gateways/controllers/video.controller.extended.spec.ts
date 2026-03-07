@@ -3,6 +3,7 @@ import { VideoController } from './video.controller';
 import { VideoProcessorUseCase } from '../../usecases/videoProcessor.usecase';
 import { FileStorageUseCase } from '../../usecases/fileStorage.usecase';
 import { ValidateFileUseCase } from '../../usecases/validateFile.usecase';
+import { PrismaVideoRepository } from '../repository/video.repository';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { getQueueToken } from '@nestjs/bullmq';
@@ -54,6 +55,15 @@ describe('VideoController - Extended Tests', () => {
         {
           provide: ValidateFileUseCase,
           useValue: { validate: jest.fn() },
+        },
+        {
+          provide: PrismaVideoRepository,
+          useValue: {
+            create: jest.fn(),
+            findById: jest.fn(),
+            findByUserId: jest.fn(),
+            updateStatus: jest.fn(),
+          },
         },
         {
           provide: ConfigService,
