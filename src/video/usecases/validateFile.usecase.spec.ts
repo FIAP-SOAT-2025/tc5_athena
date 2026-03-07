@@ -161,7 +161,7 @@ describe('ValidateFileUseCase', () => {
 
     expect(result.createdAt.getTime()).toBeGreaterThanOrEqual(beforeValidation.getTime());
     expect(result.createdAt.getTime()).toBeLessThanOrEqual(afterValidation.getTime());
-    expect(result.updatedAt).toEqual(result.createdAt);
+    expect(result.updatedAt.getTime()).toBeCloseTo(result.createdAt.getTime(), 0);
   });
 
   it('should generate unique video ID on each validation', () => {
