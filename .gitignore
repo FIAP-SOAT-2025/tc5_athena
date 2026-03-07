@@ -42,6 +42,7 @@ outputs/
 
 # dotenv environment variable files
 .env
+.env.test
 .env.development.local
 .env.test.local
 .env.production.local
@@ -62,6 +63,7 @@ outputs/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+tfplan
 
 # Runtime data
 pids

@@ -4,6 +4,7 @@ import { UploadFileUseCase } from '../../storage/usecases/uploadFile.usecase';
 import { GetFileUseCase } from 'src/storage/usecases/getFile.usecase';
 import { StorageFile } from 'src/storage/domain/storage.entity';
 import { Video } from '../domain/video.entity';
+import { join } from 'path';
 
 @Injectable()
 export class FileStorageUseCase {
@@ -24,7 +25,7 @@ export class FileStorageUseCase {
     this.logger.log(`Storing file: ${key}`);
 
     if (this.isLocal) {
-      const filePath = `${process.cwd()}/${key}`;
+      const filePath = join(process.cwd(), '..', 'uploads', key);
       await fs.promises.mkdir(
         filePath.substring(0, filePath.lastIndexOf('/')),
         { recursive: true },
@@ -47,7 +48,7 @@ export class FileStorageUseCase {
   ): Promise<string> {
     this.logger.log(`Storing buffer: ${key}`);
     if (this.isLocal) {
-      const filePath = `${process.cwd()}/${key}`;
+      const filePath = join(process.cwd(), '..', 'uploads', key);
       await fs.promises.mkdir(
         filePath.substring(0, filePath.lastIndexOf('/')),
         { recursive: true },
@@ -69,7 +70,7 @@ export class FileStorageUseCase {
     this.logger.log(`Retrieving file: ${key}`);
     try {
       if (this.isLocal) {
-        const filePath = `${process.cwd()}/${key}`;
+        const filePath = join(process.cwd(), '..', 'uploads', key);
         const buffer = await fs.promises.readFile(filePath);
         const file = new StorageFile();
         file.key = key;
