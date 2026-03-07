@@ -7,6 +7,18 @@ import { DocumentBuilder } from '@nestjs/swagger/dist/document-builder';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Enable CORS for frontend
+  const corsOrigins = process.env.CORS_ORIGINS 
+    ? process.env.CORS_ORIGINS.split(',') 
+    : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'];
+  
+  app.enableCors({
+    origin: corsOrigins.length === 1 && corsOrigins[0] === '*' ? true : corsOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+  
   app.useGlobalPipes(
     new ValidationPipe(),
   );  

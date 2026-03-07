@@ -25,6 +25,7 @@ import { VideoProcessorUseCase } from '../../usecases/videoProcessor.usecase';
 import { JwtAuthGuard } from 'src/auth/gateways/security/jwtAuth.guard';
 import { FileStorageUseCase } from 'src/video/usecases/fileStorage.usecase';
 import { ValidateFileUseCase } from 'src/video/usecases/validateFile.usecase';
+import { PrismaVideoRepository } from '../repository/video.repository';
 
 @Controller('video')
 @ApiBearerAuth()
@@ -36,6 +37,7 @@ export class VideoController {
     private readonly videoProcessorUseCase: VideoProcessorUseCase,
     private readonly fileStorageUseCase: FileStorageUseCase,
     private readonly validateFileUseCase: ValidateFileUseCase,
+    private readonly videoRepository: PrismaVideoRepository,
     @InjectQueue('video-processing')
     private readonly videoQueue: Queue,
     private readonly configService: ConfigService,
@@ -70,6 +72,14 @@ export class VideoController {
     const result = await this.videoProcessorUseCase.process(video);
     this.logger.log(`Processing queued, jobId: ${result.jobId}`);
     return result;
+  }
+
+  @Get('user/:userId')
+  @UseGuards(JwtAuthGuard)
+  async listVideosByUser(@Param('userId') userId: string) {
+    this.logger.log(`Listing videos for user ${userId}`);
+    const videos = await this.videoRepository.findByUserId(userId);
+    return videos;
   }
 
   @Get('status/:jobId')
