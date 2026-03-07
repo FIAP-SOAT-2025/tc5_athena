@@ -23,9 +23,6 @@ export function DashboardPage() {
                   <h2 className="text-lg font-medium text-gray-900">
                     Bem-vindo de volta, {user?.name}!
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Você está conectado como <span className="font-semibold">{user?.role}</span>
-                  </p>
                 </div>
               </div>
 
