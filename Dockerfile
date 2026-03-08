@@ -9,6 +9,8 @@ RUN npm ci
 
 COPY . .
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+RUN npx prisma migrate dev
 RUN npx prisma generate
 RUN npm run build
 
@@ -23,6 +25,8 @@ COPY prisma ./prisma/
 
 RUN npm ci --omit=dev
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+RUN npx prisma migrate dev
 RUN npx prisma generate
 
 COPY --from=builder /app/dist ./dist

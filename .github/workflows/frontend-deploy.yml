@@ -1,0 +1,233 @@
+name: Athena Frontend Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: eks-tc5-g192-athena-v1-v1
+  K8S_NAMESPACE: tc5-athena
+  FRONTEND_DEPLOYMENT_NAME: tc5-athena-frontend
+  FRONTEND_SERVICE_NAME: frontend-service
+  FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/tc5-athena-frontend:latest
+
+jobs:
+  check-dependencies:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: production
+    outputs:
+      infra-exists: ${{ steps.check-deps.outputs.infra-exists }}
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check Dependencies
+        id: check-deps
+        run: |
+          if aws eks describe-cluster --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} &> /dev/null; then
+            echo "infra-exists=true" >> $GITHUB_OUTPUT
+            echo "EKS cluster exists"
+          else
+            echo "infra-exists=false" >> $GITHUB_OUTPUT
+            echo "EKS cluster not found"
+          fi
+
+  build-and-push:
+    name: Build and Push Frontend Image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ env.FRONTEND_IMAGE }}
+          build-args: |
+            VITE_API_URL=${{ secrets.FRONTEND_API_URL }}
+
+  frontend-apply:
+    name: Frontend Deploy
+    needs: [check-dependencies]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply' && needs.check-dependencies.outputs.infra-exists == 'true'
+    environment: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          kubectl get nodes
+
+      - name: Ensure Namespace Exists
+        run: |
+          kubectl get namespace ${{ env.K8S_NAMESPACE }} >/dev/null 2>&1 || kubectl create namespace ${{ env.K8S_NAMESPACE }}
+
+      - name: Apply Frontend Deployment and Service
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${{ env.FRONTEND_DEPLOYMENT_NAME }}
+            namespace: ${{ env.K8S_NAMESPACE }}
+            labels:
+              app: ${{ env.FRONTEND_DEPLOYMENT_NAME }}
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: ${{ env.FRONTEND_DEPLOYMENT_NAME }}
+            template:
+              metadata:
+                labels:
+                  app: ${{ env.FRONTEND_DEPLOYMENT_NAME }}
+              spec:
+                containers:
+                  - name: frontend
+                    image: ${{ env.FRONTEND_IMAGE }}
+                    ports:
+                      - containerPort: 80
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${{ env.FRONTEND_SERVICE_NAME }}
+            namespace: ${{ env.K8S_NAMESPACE }}
+          spec:
+            type: LoadBalancer
+            selector:
+              app: ${{ env.FRONTEND_DEPLOYMENT_NAME }}
+            ports:
+              - port: 80
+                targetPort: 80
+          EOF
+
+      - name: Force Image Refresh
+        run: |
+          kubectl set image deployment/${{ env.FRONTEND_DEPLOYMENT_NAME }} frontend=${{ env.FRONTEND_IMAGE }} -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Verify Frontend Deployment
+        run: |
+          echo "Waiting for Frontend deployment rollout..."
+          kubectl rollout status deployment/${{ env.FRONTEND_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }} --timeout=5m
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.FRONTEND_DEPLOYMENT_NAME }}
+          kubectl get svc -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Get LoadBalancer URL
+        id: get-url
+        run: |
+          echo "Waiting for LoadBalancer to get external hostname..."
+          sleep 60
+          LB_HOSTNAME=$(kubectl get svc ${{ env.FRONTEND_SERVICE_NAME }} -n ${{ env.K8S_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          if [ -n "$LB_HOSTNAME" ]; then
+            echo "loadbalancer-url=http://$LB_HOSTNAME" >> $GITHUB_OUTPUT
+            echo "LoadBalancer URL: http://$LB_HOSTNAME"
+          else
+            echo "LoadBalancer still provisioning..."
+            echo "loadbalancer-url=pending" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Debug pods on failure
+        if: failure()
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -o wide || true
+          echo "=== Describe frontend pods ==="
+          kubectl describe pods -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.FRONTEND_DEPLOYMENT_NAME }} || true
+          echo "=== Logs (current) ==="
+          kubectl logs -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.FRONTEND_DEPLOYMENT_NAME }} --tail=100 || true
+          echo "=== Logs (previous crash) ==="
+          kubectl logs -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.FRONTEND_DEPLOYMENT_NAME }} --previous --tail=100 || true
+          echo "=== Events ==="
+          kubectl get events -n ${{ env.K8S_NAMESPACE }} --sort-by='.lastTimestamp' || true
+
+      - name: Output Frontend Info
+        run: |
+          echo "Frontend deployed successfully!"
+          echo "Namespace: ${{ env.K8S_NAMESPACE }}"
+          echo "Deployment: ${{ env.FRONTEND_DEPLOYMENT_NAME }}"
+          echo "Service: ${{ env.FRONTEND_SERVICE_NAME }}"
+          echo "LoadBalancer: ${{ steps.get-url.outputs.loadbalancer-url }}"
+
+  frontend-destroy:
+    name: Frontend Destroy
+    needs: [check-dependencies]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy' && needs.check-dependencies.outputs.infra-exists == 'true'
+    environment: production
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          kubectl get nodes || echo "Failed to get nodes, but continuing..."
+
+      - name: Delete Frontend Resources
+        run: |
+          kubectl delete service ${{ env.FRONTEND_SERVICE_NAME }} -n ${{ env.K8S_NAMESPACE }} --ignore-not-found=true
+          kubectl delete deployment ${{ env.FRONTEND_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }} --ignore-not-found=true
+
+      - name: Verify Destruction
+        run: |
+          echo "Verifying frontend resource destruction..."
+          kubectl get deployment ${{ env.FRONTEND_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }} || echo "Frontend deployment removed"
+          kubectl get service ${{ env.FRONTEND_SERVICE_NAME }} -n ${{ env.K8S_NAMESPACE }} || echo "Frontend service removed"
+          echo "Frontend destroy job completed"

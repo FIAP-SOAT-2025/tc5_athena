@@ -215,6 +215,16 @@ docker-compose up --build
 docker-compose up -d postgres redis
 ```
 
+### Frontend em container separado
+
+```bash
+cd frontend
+docker compose up --build -d
+```
+
+- Frontend: http://localhost:8080
+- Deploy AWS (somente frontend): [docs/deploy-frontend-aws.md](docs/deploy-frontend-aws.md)
+
 ---
 
 ## Monitoring

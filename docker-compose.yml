@@ -6,9 +6,9 @@ services:
     container_name: postgres
     restart: always
     environment:
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER:-athena_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athena123}
+      POSTGRES_DB: ${POSTGRES_DB:-athena_database}
     ports:
       - "5432:5432"
     volumes:
@@ -28,7 +28,7 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-athena_user}:${POSTGRES_PASSWORD:-athena123}@postgres:5432/${POSTGRES_DB:-athena_database}?schema=public
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: "*"
     ports:
@@ -38,7 +38,7 @@ services:
     container_name: postgres-exporter
     restart: always
     environment:
-      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-athena_user}:${POSTGRES_PASSWORD:-athena123}@postgres:5432/${POSTGRES_DB:-athena_database}?sslmode=disable"
     ports:
       - "9187:9187"
     depends_on:
