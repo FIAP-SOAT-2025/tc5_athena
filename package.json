@@ -94,9 +94,11 @@
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s",
+      "!**/*.spec.ts",
       "!**/*.module.ts",
       "!**/*.dto.ts",
-      "!**/main.ts"
+      "!**/interfaces/**",
+      "!main.ts"
     ],
     "coverageReporters": [
       "text",
@@ -105,6 +107,14 @@
       "json-summary"
     ],
     "coverageDirectory": "../coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 70,
+        "branches": 70,
+        "functions": 70,
+        "lines": 70
+      }
+    },
     "testEnvironment": "node"
   }
 }
