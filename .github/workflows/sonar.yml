@@ -1,0 +1,55 @@
+name: CI - SonarCloud Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarcloud:
+    name: Analyze with SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:cov:sonar
+
+      - name: Debug coverage file
+        run: |
+          echo "Verificando se a pasta coverage existe:"
+          ls -la coverage/ || echo "Pasta coverage não encontrada"
+
+          echo "Verificando se o arquivo lcov.info foi gerado:"
+          ls -lh coverage/lcov.info || echo "Arquivo lcov.info não encontrado"
+
+          echo "Primeiras 20 linhas do arquivo lcov.info:"
+          head -20 coverage/lcov.info || echo "Arquivo lcov.info não encontrado"
+
+      - name: Run SonarCloud analysis
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=src/**/*.spec.ts
+            -Dsonar.coverage.reportPaths=coverage/lcov.info

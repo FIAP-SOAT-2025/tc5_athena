@@ -3,10 +3,6 @@ name: Athena Deploy
 on:
   push:
     branches: [main]
-    paths: ['/**']
-  pull_request:
-    branches: [main]
-    paths: ['/**']
   workflow_dispatch:
     inputs:
       action:
@@ -81,7 +77,6 @@ jobs:
 
   build-and-push:
     name: Build and Push Docker Image
-    needs: [check-dependencies]
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' && needs.check-dependencies.outputs.infra-exists == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'apply')
     environment: production
@@ -104,9 +99,9 @@ jobs:
 
   terraform-apply:
     name: API Deploy
-    needs: [check-dependencies, build-and-push]
+    needs: [check-dependencies]
     runs-on: ubuntu-latest
-    if: needs.check-dependencies.outputs.infra-exists == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'apply')
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply' && needs.check-dependencies.outputs.infra-exists == 'true'
     defaults:
       run:
         working-directory: ./iac/terraform
@@ -119,6 +114,9 @@ jobs:
       TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       TF_VAR_dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
       TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+      TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -154,13 +152,6 @@ jobs:
       
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-
-      - name: Reset Grafana Admin Password
-        run: |
-          echo "Waiting for Grafana to be ready..."
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana -n monitoring --timeout=3m
-          kubectl exec -n monitoring deploy/grafana -- grafana-cli admin reset-admin-password ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
-          echo "Grafana password updated successfully!"
 
       - name: Debug pods on failure
         if: failure()
