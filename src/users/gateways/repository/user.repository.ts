@@ -35,7 +35,6 @@ export class PrismaUserRepository implements UserRepositoryInterface {
     const user = await this.orm.user.findUnique({
       where: { email },
     });
-    console.log('[PrismaUserRepository.findByUserEmail] User found by email:', user);
     return user;
   }
 
@@ -44,7 +43,6 @@ export class PrismaUserRepository implements UserRepositoryInterface {
       where: { email },
       select: this.selectWithoutPassword,
     });
-    console.log('[UserRepository.findByEmail] User found by email:', user);
     return user;
   }
 

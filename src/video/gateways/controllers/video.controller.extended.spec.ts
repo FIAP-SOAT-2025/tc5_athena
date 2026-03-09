@@ -15,7 +15,7 @@ describe('VideoController - Extended Tests', () => {
   let validateFileUseCase: jest.Mocked<ValidateFileUseCase>;
   let videoQueue: jest.Mocked<Queue>;
 
-  const mockUser = { userId: 'user-123', email: 'test@example.com' };
+  const mockUser = { userId: 'user-123', email: 'test@example.com', name: 'Test User' };
 
   const mockFile: Express.Multer.File = {
     fieldname: 'file',
@@ -119,13 +119,14 @@ describe('VideoController - Extended Tests', () => {
     videoProcessorUseCase.process.mockResolvedValue({
       jobId: 'job-1',
       status: 'Processing',
-      videoId: mockVideo.id,
+      videoId: mockVideo.id, 
+      
     });
 
     const req = { user: mockUser } as any;
     await controller.uploadVideo(mockFile, req);
 
-    expect(videoProcessorUseCase.process).toHaveBeenCalledWith(mockVideo);
+    expect(videoProcessorUseCase.process).toHaveBeenCalledWith(mockVideo, mockUser.email, mockUser.name);
   });
 
   it('should return jobId when upload successful', async () => {
@@ -298,7 +299,7 @@ describe('VideoController - Extended Tests', () => {
       videoId: mockVideo.id,
     });
 
-    const req = { user: { userId: 'specific-user-id', email: 'specific@test.com' } } as any;
+    const req = { user: { userId: 'specific-user-id', email: 'specific@test.com', name: 'Specific User' } } as any;
     await controller.uploadVideo(mockFile, req);
 
     expect(validateFileUseCase.validate).toHaveBeenCalledWith(
@@ -308,7 +309,7 @@ describe('VideoController - Extended Tests', () => {
   });
 
   it('should validate file with correct user context', async () => {
-    const differentUser = { userId: 'user-999', email: 'other@example.com' };
+    const differentUser = { userId: 'user-999', email: 'other@example.com', name: 'Different User' };
     validateFileUseCase.validate.mockReturnValue(mockVideo as any);
     fileStorageUseCase.storeFile.mockResolvedValue(undefined);
     videoProcessorUseCase.process.mockResolvedValue({

@@ -58,18 +58,18 @@ export class VideoController {
   })
   async uploadVideo(
     @UploadedFile() file: Express.Multer.File,
-    @Request() req: { user: { userId: string; email: string } },
+    @Request() req: { user: { userId: string; email: string; name: string; } },
   ) {
-    const { userId } = req.user;
+    const { userId, email, name } = req.user;
     this.logger.log(
-      `Upload requested by user ${userId}, file: ${file.originalname}`,
+      `Upload requested by user ${userId}, email: ${email}, name: ${name}, file: ${file.originalname}`,
     );
     const video = this.validateFileUseCase.validate(file, userId);
 
     await this.fileStorageUseCase.storeFile(video, file);
     this.logger.log(`File stored, videoId: ${video.id}`);
 
-    const result = await this.videoProcessorUseCase.process(video);
+    const result = await this.videoProcessorUseCase.process(video,email,name);
     this.logger.log(`Processing queued, jobId: ${result.jobId}`);
     return result;
   }

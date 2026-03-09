@@ -17,7 +17,7 @@ describe('VideoController', () => {
   let validateFileUseCase: ValidateFileUseCase;
   let videoQueue: Queue;
 
-  const mockUser = { userId: 'user-123', email: 'test@example.com' };
+  const mockUser = { userId: 'user-123', email: 'test@example.com', name: 'Test User' };
 
   const mockFile: Express.Multer.File = {
     fieldname: 'file',
@@ -125,7 +125,7 @@ describe('VideoController', () => {
 
       expect(validateFileUseCase.validate).toHaveBeenCalledWith(mockFile, mockUser.userId);
       expect(fileStorageUseCase.storeFile).toHaveBeenCalledWith(mockVideo, mockFile);
-      expect(videoProcessorUseCase.process).toHaveBeenCalledWith(mockVideo);
+      expect(videoProcessorUseCase.process).toHaveBeenCalledWith(mockVideo, mockUser.email, mockUser.name);
       expect(result).toEqual(mockProcessResult);
     });
 
@@ -157,7 +157,7 @@ describe('VideoController', () => {
     });
 
     it('should throw NotFoundException when job does not exist', async () => {
-      jest.spyOn(videoQueue, 'getJob').mockResolvedValue(null);
+      jest.spyOn(videoQueue, 'getJob').mockResolvedValue(undefined);
 
       await expect(controller.getStatus('non-existent-job')).rejects.toThrow(NotFoundException);
       expect(videoQueue.getJob).toHaveBeenCalledWith('non-existent-job');

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post,Logger } from '@nestjs/common';
 import { AuthUseCase } from '../../usecases/auth.usecase';
 import { CredentialsDto } from './dtos/credentials.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
@@ -7,13 +7,16 @@ import { AuthRefreshTokenUseCase } from 'src/auth/usecases/authRefreshToken.usec
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authUseCase: AuthUseCase, private readonly authRefreshTokenUseCase: AuthRefreshTokenUseCase    ) {}
+     private readonly logger = new Logger(AuthController.name);   
+    constructor(private readonly authUseCase: AuthUseCase, 
+        private readonly authRefreshTokenUseCase: AuthRefreshTokenUseCase,
+    ) {}
 
     @Post('signin')
     async signIn(@Body() credentials: CredentialsDto) {
         
         const { email, password } = credentials;
-        console.log("[AuthController.signIn] Received sign-in request with email:", email);
+         this.logger.log(`[AuthController.signIn] Received sign-in request with email:${email}`);
         return this.authUseCase.signIn(email, password);
     }
 

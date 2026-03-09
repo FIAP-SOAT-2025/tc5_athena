@@ -14,7 +14,7 @@ export class VideoProcessorUseCase {
     private readonly videoRepository: PrismaVideoRepository,
   ) {}
 
-  async process(video: Video) {
+  async process(video: Video, email: string, name: string) {
     this.logger.log(`Creating video record: ${video.id}`);
     await this.videoRepository.create(video);
 
@@ -27,6 +27,8 @@ export class VideoProcessorUseCase {
         videoId: video.id,
         userId: video.userId,
         originalName: video.file_name,
+        userEmail: email,
+        userName: name,
         timestamp: timestamp,
       },
       {
