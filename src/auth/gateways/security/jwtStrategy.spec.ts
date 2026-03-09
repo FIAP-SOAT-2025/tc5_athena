@@ -50,6 +50,7 @@ describe('JwtStrategy', () => {
       expect(result).toEqual({
         userId: mockUser.id,
         email: mockUser.email,
+        name: mockUser.name,
       });
     });
 
@@ -66,16 +67,15 @@ describe('JwtStrategy', () => {
     });
 
     it('should return only userId and email, not leaking other user data', async () => {
-      const payload = { sub: mockUser.id, email: mockUser.email, role: mockUser.role };
+      const payload = { sub: mockUser.id, email: mockUser.email, role: mockUser.role, name: mockUser.name };
 
       jest.spyOn(userRepository, 'findByUserEmail').mockResolvedValue(mockUser);
 
       const result = await strategy.validate(payload);
 
       expect(result).not.toHaveProperty('passwordHash');
-      expect(result).not.toHaveProperty('name');
       expect(result).not.toHaveProperty('role');
-      expect(Object.keys(result)).toEqual(['userId', 'email']);
+      expect(Object.keys(result)).toEqual(['userId', 'email', 'name']);
     });
   });
 });

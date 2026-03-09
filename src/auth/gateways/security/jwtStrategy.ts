@@ -15,13 +15,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        console.log(`[JwtStrategy.validate] Validating JWT for email: ${payload.email}`);
         const emailExists = await this.userRepository.findByUserEmail(payload.email);
-        console.log(`[JwtStrategy.validate] User found: ${emailExists ? emailExists.email : 'No user found'}`);
         if (!emailExists) {
-            console.error(`[JwtStrategy.validate] User not found for email: ${payload.email}`);
             throw new UnauthorizedException();
         }
-        return { userId: emailExists.id, email: emailExists.email };
+        return { 
+            userId: emailExists.id, 
+            email: emailExists.email, 
+            name: emailExists.name 
+        };
     }
 }

@@ -14,7 +14,7 @@ import { AuthRefreshTokenUseCase } from './usecases/authRefreshToken.usecase';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '160s' },
+        signOptions: { expiresIn: '4h' },
       }),
     }),
   ],

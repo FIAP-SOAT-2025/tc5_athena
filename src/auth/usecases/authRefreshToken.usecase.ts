@@ -16,10 +16,7 @@ export class AuthRefreshTokenUseCase {
         
         try {
             payload = this.jwtService.verifyRefresh(refreshToken);
-            console.log("[AuthRefreshTokenUseCase.refreshToken] Refresh token payload:", payload);
-            
-        
-
+               
             const user = await this.userRepository.findByUserEmail(payload.email);
             if (!user) {
                 throw new UnauthorizedException('Email Not found');
