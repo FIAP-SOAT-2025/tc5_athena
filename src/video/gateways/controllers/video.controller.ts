@@ -62,7 +62,7 @@ export class VideoController {
   ) {
     const { userId, email, name } = req.user;
     this.logger.log(
-      `Upload requested by user ${userId}, email: ${email}, name: ${name}, file: ${file.originalname}`,
+      `Upload requested by user ${userId}, email: ${email}, name::: ${name}, file: ${file.originalname}`,
     );
     const video = this.validateFileUseCase.validate(file, userId);
 
