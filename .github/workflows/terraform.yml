@@ -75,7 +75,7 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' && needs.check-dependencies.outputs.infra-exists == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'apply')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     environment: production
     steps:
       - name: Checkout Code

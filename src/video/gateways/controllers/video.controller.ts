@@ -61,6 +61,8 @@ export class VideoController {
     @Request() req: { user: { userId: string; email: string; name: string; } },
   ) {
     const { userId, email, name } = req.user;
+
+    this.logger.log("imgem docker api atualizada março");
     this.logger.log(
       `Upload requested by user ${userId}, email: ${email}, name::: ${name}, file: ${file.originalname}`,
     );
