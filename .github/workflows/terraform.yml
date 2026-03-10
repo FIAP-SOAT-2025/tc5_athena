@@ -96,9 +96,9 @@ jobs:
 
   terraform-apply:
     name: API Deploy
-    needs: [check-dependencies]
+    needs: [check-dependencies, build-and-push]
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply' && needs.check-dependencies.outputs.infra-exists == 'true'
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')) && needs.check-dependencies.outputs.infra-exists == 'true'
     defaults:
       run:
         working-directory: ./iac/terraform
