@@ -78,3 +78,8 @@ variable "aws_session_token" {
   sensitive   = true
   default     = ""
 }
+
+variable "redis_host" {
+  description = "Host do Redis (ElastiCache endpoint)"
+  type        = string
+}

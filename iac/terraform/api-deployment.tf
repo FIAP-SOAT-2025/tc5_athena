@@ -79,6 +79,22 @@ resource "kubernetes_deployment" "api" {
           name = kubernetes_secret.dockerhub.metadata[0].name
         }
 
+        init_container {
+          name    = "db-migrate"
+          image   = "${var.dockerhub_username}/tc5-athena:latest"
+          command = ["npx", "prisma", "migrate", "deploy"]
+
+          env {
+            name = "DATABASE_URL"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.api_env.metadata[0].name
+                key  = "DATABASE_URL"
+              }
+            }
+          }
+        }
+
         container {
           name  = "api"
           image = "${var.dockerhub_username}/tc5-athena:latest"
@@ -135,6 +151,11 @@ resource "kubernetes_deployment" "api" {
                 key  = "AWS_SESSION_TOKEN"
               }
             }
+          }
+
+          env {
+            name  = "REDIS_HOST"
+            value = var.redis_host
           }
 
           env {
