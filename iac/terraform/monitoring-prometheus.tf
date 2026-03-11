@@ -27,5 +27,15 @@ resource "helm_release" "prometheus" {
     value = "ClusterIP"
   }
 
+  set {
+    name  = "server.global.scrape_interval"
+    value = "15s"
+  }
+
+  set {
+    name  = "server.global.evaluation_interval"
+    value = "15s"
+  }
+
   depends_on = [kubernetes_namespace.monitoring]
 }
