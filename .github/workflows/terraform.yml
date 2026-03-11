@@ -192,6 +192,12 @@ jobs:
           if kubectl get secret api-env-secret -n tc5-athena > /dev/null 2>&1; then
             import_if_missing kubernetes_secret.api_env tc5-athena/api-env-secret
           fi
+          if kubectl get deployment tc5-athena-api -n tc5-athena > /dev/null 2>&1; then
+            import_if_missing kubernetes_deployment.api tc5-athena/tc5-athena-api
+          fi
+          if kubectl get service api-service -n tc5-athena > /dev/null 2>&1; then
+            import_if_missing kubernetes_service.api tc5-athena/api-service
+          fi
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
