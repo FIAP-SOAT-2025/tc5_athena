@@ -17,7 +17,7 @@ name: Athena Deploy
   env:
     AWS_REGION: us-east-1
     TF_VERSION: 1.6.0
-    EKS_CLUSTER_NAME: eks-tc5-g192-athena-v1-v1
+    EKS_CLUSTER_NAME: eks-tc5-g192-athena-v1
 
   jobs:
     ci:
