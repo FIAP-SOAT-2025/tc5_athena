@@ -72,6 +72,11 @@ resource "kubernetes_deployment" "api" {
         labels = {
           app = "tc5-athena-api"
         }
+        annotations = {
+          "prometheus.io/scrape" = "true"
+          "prometheus.io/port"   = "3000"
+          "prometheus.io/path"   = "/metrics"
+        }
       }
 
       spec {
