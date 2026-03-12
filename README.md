@@ -223,6 +223,10 @@ npm run test:cov
 npm run test:e2e
 ```
 
+## Cobertura de testes unitários
+
+![Cobertura de testes](./docs/cobertura_test.png)
+
 ---
 
 ## 📊 Monitoramento
